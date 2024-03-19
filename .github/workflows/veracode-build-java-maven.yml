@@ -46,12 +46,8 @@ jobs:
         cd $cliFileName
         chmod +x install.sh
         ./install.sh system
-        ls /home/runner/work/
-        ls /home/runner/work/veracode/
-        ls /home/runner/work/veracode/veracode/
         cd /home/runner/work/veracode/veracode/
         veracode package --source . --output veracode-artifacts --trust
-        ls /home/runner/work/veracode/veracode/veracode-artifacts/
         zip veracode-artifact.zip veracode-artifacts/* -x .zip .tar .tar.gz .gz
     - uses: actions/upload-artifact@v3
       with:
