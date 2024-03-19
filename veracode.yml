@@ -35,6 +35,7 @@ veracode_static_scan:
   # Set the property to 'default' if you'd like to use the default
   # workflow for each repository.
   #If enabled, you will be able to view static findings as a security issue in GitHub.
+  use_custom_workflow: veracode-build
   create_code_scanning_alert: false
   create_issue: false
   profile: ENTER_PROFILE_NAME
