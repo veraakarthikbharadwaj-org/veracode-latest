@@ -34,7 +34,6 @@ veracode_static_scan:
   # set use_custom_workflow to the name of the workflow you'd like to use. 
   # Set the property to 'default' if you'd like to use the default
   # workflow for each repository.
-  use_custom_workflow: veracode-build
   #If enabled, you will be able to view static findings as a security issue in GitHub.
   create_code_scanning_alert: false
   create_issue: false
