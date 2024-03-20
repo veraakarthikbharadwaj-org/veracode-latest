@@ -2,6 +2,10 @@ name: Binary Ready - Veracode Static Code Analysis
 
 run-name: Binary Ready - Static Code Analysis - ${{ github.event.client_payload.repository.name }}
 
+concurrency:
+  group: ${{ github.event.client_payload.event_type }}-${{ github.event.client_payload.repository.name }}-${{ github.event.client_payload.branch }}
+  cancel-in-progress: true
+
 on:
   repository_dispatch:
     types: [binary-ready-veracode-sast-policy-scan]
@@ -24,15 +28,17 @@ jobs:
     steps:
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
-          github_token: ${{ github.event.client_payload.token }}
-          run_id: ${{ github.event.client_payload.run_id }}
-          repo: ${{ github.event.client_payload.repository.full_name }}
+          github-token: ${{ github.event.client_payload.token }}
+          repository: ${{ github.event.client_payload.repository.full_name }}
+          run-id: ${{ github.event.client_payload.run_id }}
+
       - name: Get the name of the downloaded files
         run: |
           artifact_file=$(ls -1 ./veracode-artifact | head -n 1)
           echo "veracode_artifact=$artifact_file" >> $GITHUB_ENV
+
       - name: Veracode Upload and Scan Action Step
         uses: veracode/uploadandscan-action@main
         id: upload_and_scan
@@ -44,6 +50,50 @@ jobs:
           version: '${{ github.run_id }}'
           filepath: ./veracode-artifact/${{ env.veracode_artifact }}
           include: ${{ github.event.client_payload.modules_to_scan }}
-          policy: VeraDemo Policy
+          policy: ${{ github.event.client_payload.policy_name }}
           scantimeout: 15
           failbuild: true
+
+# This step will import the flaws from the step above
+  create-issues:
+    needs: policy_scan
+
+    if: ${{ inputs.create_issue && failure() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get flaw file
+        uses: actions/download-artifact@v3
+        with:
+          name: 'policy-flaws'
+          path: /tmp
+      - name: Create flaws as issues
+        uses: veracode/veracode-flaws-to-issues@addWorkflowAppSupport
+        with:
+          scan-results-json: '/tmp/policy_flaws.json'
+          repo_owner: ${{ inputs.owner }}
+          repo_name: ${{ inputs.repo }}
+          github-token: ${{ inputs.token }}
+  
+  results_to_security_tab:
+    needs: policy_scan
+    runs-on: ubuntu-latest
+    if: ${{ failure() && inputs.create_code_scanning_alert }}
+    name: Send policy scan report to Security tab
+    steps:
+      - name: Get scan results
+        uses: actions/download-artifact@v3
+        with:
+          name: policy-flaws
+          path: /tmp
+      - name: Convert policy scan output to SARIF format
+        id: convert
+        uses: Veracode/veracode-pipeline-scan-results-to-sarif@v2.0.0
+        with:
+          scan-type: policy
+          results-json: '/tmp/policy_flaws.json'
+          output-results-sarif: veracode-results.sarif
+          repo_owner: ${{ inputs.owner }}
+          repo_name: ${{ inputs.repo }}
+          commitSHA: ${{ inputs.sha }}
+          ref: ${{ inputs.ref }}
+          githubToken: ${{ inputs.token }}
