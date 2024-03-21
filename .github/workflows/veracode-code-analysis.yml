@@ -67,6 +67,7 @@ jobs:
           appname: ${{ github.event.client_payload.user_config.profile_name }}
           source_repository: ${{ github.event.client_payload.repository.full_name }}
           check_run_id: ${{ needs.register.outputs.run_id }}
+          branch: ${{ github.event.client_payload.repository.branch }}
       
       - name: Verify Policy name
         id: verify_policy_name
