@@ -3,7 +3,7 @@ name: Binary Ready - Veracode Static Code Analysis
 run-name: Binary Ready - Static Code Analysis - ${{ github.event.client_payload.repository.name }}
 
 concurrency:
-  group: ${{ github.event.client_payload.event_type }}-${{ github.event.client_payload.repository.name }}-${{ github.event.client_payload.branch }}
+  group: ${{ github.event.client_payload.event_type }}-${{ github.event.client_payload.repository.name }}-${{ github.event.client_payload.repository.branch }}
   cancel-in-progress: true
 
 on:
@@ -21,6 +21,7 @@ jobs:
       event_type: ${{ github.event.client_payload.event_type }}
       github_token: ${{ github.event.client_payload.token }}
       run_id: ${{ github.run_id }}
+      branch: ${{ github.event.client_payload.repository.branch }}
 
   policy_scan:
     needs: register
