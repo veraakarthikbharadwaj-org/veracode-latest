@@ -48,7 +48,7 @@ jobs:
         createprofile: true
         policy: ${{ github.event.client_payload.policy_name }}
         version: '${{ github.run_id }}'
-        filepath: ./veracode_artifact_directory/${{ env.veracode_artifact }}
+        filepath: ./veracode-artifact/${{ env.veracode_artifact }}
         vid: '${{ secrets.VERACODE_API_ID }}'
         vkey: '${{ secrets.VERACODE_API_KEY }}'
         createsandbox: true
