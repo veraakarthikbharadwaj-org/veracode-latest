@@ -3,7 +3,7 @@ name: Binary Ready - Veracode Static Sandbox Scanner
 run-name: Binary Ready - Static Sandbox Scanner - ${{ github.event.client_payload.repository.name }}
 
 concurrency:
-  group: ${{ github.event.client_payload.event_type }}-${{ github.event.client_payload.repository.name }}-${{ github.event.client_payload.branch }}
+  group: ${{ github.event.client_payload.event_type }}-${{ github.event.client_payload.repository.name }}-${{ github.event.client_payload.repository.branch }}
   cancel-in-progress: true
 
 on:
@@ -51,6 +51,6 @@ jobs:
         vid: '${{ secrets.VERACODE_API_ID }}'
         vkey: '${{ secrets.VERACODE_API_KEY }}'
         createsandbox: true
-        sandboxname: GitHub App Scans-${{ github.event.client_payload.branch }}
+        sandboxname: GitHub App Scans-${{ github.event.client_payload.repository.branch }}
         include: ${{ github.event.client_payload.modules_to_scan }}
         failbuild: true
